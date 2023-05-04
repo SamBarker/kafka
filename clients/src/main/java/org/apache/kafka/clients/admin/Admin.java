@@ -123,7 +123,7 @@ import java.util.Set;
  */
 @InterfaceStability.Evolving
 public interface Admin extends AutoCloseable {
-    long DEFAULT_CLOSE_TIMEOUT_MS = Long.MAX_VALUE;
+    long DEFAULT_CLOSE_TIMEOUT_MS = Long.parseLong(System.getProperty("kafka.defaultCloseTimeoutMs", String.valueOf(Long.MAX_VALUE)));
 
     /**
      * Create a new Admin with the given configuration.

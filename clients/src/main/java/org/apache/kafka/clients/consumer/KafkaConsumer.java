@@ -565,7 +565,7 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
     private static final String CLIENT_ID_METRIC_TAG = "client-id";
     private static final long NO_CURRENT_THREAD = -1L;
     private static final String JMX_PREFIX = "kafka.consumer";
-    static final long DEFAULT_CLOSE_TIMEOUT_MS = 30 * 1000;
+    static final long DEFAULT_CLOSE_TIMEOUT_MS = Long.parseLong(System.getProperty("kafka.defaultCloseTimeoutMs", String.valueOf(30 * 1000)));
     static final String DEFAULT_REASON = "rebalance enforced by user";
 
     // Visible for testing
