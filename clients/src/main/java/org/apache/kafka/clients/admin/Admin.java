@@ -123,6 +123,7 @@ import java.util.Set;
  */
 @InterfaceStability.Evolving
 public interface Admin extends AutoCloseable {
+    long DEFAULT_CLOSE_TIMEOUT_MS = Long.MAX_VALUE;
 
     /**
      * Create a new Admin with the given configuration.
@@ -151,7 +152,7 @@ public interface Admin extends AutoCloseable {
      */
     @Override
     default void close() {
-        close(Duration.ofMillis(Long.MAX_VALUE));
+        close(Duration.ofMillis(DEFAULT_CLOSE_TIMEOUT_MS));
     }
 
     /**

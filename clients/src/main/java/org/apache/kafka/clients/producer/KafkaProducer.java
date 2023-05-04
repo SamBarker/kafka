@@ -231,6 +231,8 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class KafkaProducer<K, V> implements Producer<K, V> {
 
+    static final long DEFAULT_CLOSE_TIMEOUT_MS = Long.MAX_VALUE;
+
     private final Logger log;
     private static final String JMX_PREFIX = "kafka.producer";
     public static final String NETWORK_THREAD_PREFIX = "kafka-producer-network-thread";
@@ -1276,7 +1278,7 @@ public class KafkaProducer<K, V> implements Producer<K, V> {
      */
     @Override
     public void close() {
-        close(Duration.ofMillis(Long.MAX_VALUE));
+        close(Duration.ofMillis(DEFAULT_CLOSE_TIMEOUT_MS));
     }
 
     /**
