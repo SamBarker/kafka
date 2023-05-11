@@ -227,7 +227,12 @@ public class AdminClientConfig extends AbstractConfig {
                                         Importance.MEDIUM,
                                         SECURITY_PROTOCOL_DOC)
                                 .withClientSslSupport()
-                                .withClientSaslSupport();
+                                .withClientSaslSupport()
+                                .define(CommonClientConfigs.DEFAULT_CLOSE_TIMEOUT_CONFIG,
+                                        Type.LONG,
+                                        Long.MAX_VALUE,
+                                        Importance.LOW,
+                                        CommonClientConfigs.DEFAULT_CLOSE_TIMEOUT_DOC);
     }
 
     @Override

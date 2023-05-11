@@ -193,6 +193,9 @@ public class CommonClientConfigs {
     public static final String DEFAULT_API_TIMEOUT_MS_DOC = "Specifies the timeout (in milliseconds) for client APIs. " +
             "This configuration is used as the default timeout for all client operations that do not specify a <code>timeout</code> parameter.";
 
+    public static final String DEFAULT_CLOSE_TIMEOUT_CONFIG = "default.close.timeout.millis";
+    public static final String DEFAULT_CLOSE_TIMEOUT_DOC = "Defines the timeout to use when being closed without arguments.";
+
     /**
      * Postprocess the configuration so that exponential backoff is disabled when reconnect backoff
      * is explicitly configured but the maximum reconnect backoff is not explicitly configured.

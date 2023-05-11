@@ -378,6 +378,7 @@ public class KafkaAdminClient extends AdminClient {
     private final int maxRetries;
 
     private final long retryBackoffMs;
+    private final long closeTimeoutMs;
 
     /**
      * Get or create a list value from a map.
@@ -592,6 +593,8 @@ public class KafkaAdminClient extends AdminClient {
             new TimeoutProcessorFactory() : timeoutProcessorFactory;
         this.maxRetries = config.getInt(AdminClientConfig.RETRIES_CONFIG);
         this.retryBackoffMs = config.getLong(AdminClientConfig.RETRY_BACKOFF_MS_CONFIG);
+        final Long closeTimeoutMs = config.getLong(CommonClientConfigs.DEFAULT_CLOSE_TIMEOUT_CONFIG);
+        this.closeTimeoutMs = closeTimeoutMs != null ? closeTimeoutMs : DEFAULT_CLOSE_TIMEOUT_MS;
         config.logUnused();
         AppInfoParser.registerAppInfo(JMX_PREFIX, clientId, metrics, time.milliseconds());
         log.debug("Kafka admin client initialized");
@@ -621,6 +624,17 @@ public class KafkaAdminClient extends AdminClient {
             }
         }
         return defaultApiTimeoutMs;
+    }
+
+    /**
+     * Close the Admin, waiting for up to the configured timeout (default timeout of 30 seconds) for any needed cleanup,
+     * and release all associated resources.
+     * <p>
+     * See {@link #close(Duration)}
+     */
+    @Override
+    public void close() {
+        close(Duration.ofMillis(closeTimeoutMs));
     }
 
     @Override

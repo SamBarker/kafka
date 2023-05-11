@@ -260,6 +260,7 @@ public class KafkaProducer<K, V> implements Producer<K, V> {
     private final ProducerInterceptors<K, V> interceptors;
     private final ApiVersions apiVersions;
     private final TransactionManager transactionManager;
+    private final long closeTimeoutMs;
 
     /**
      * A producer is instantiated by providing a set of key-value pairs as configuration. Valid configuration strings
@@ -457,6 +458,8 @@ public class KafkaProducer<K, V> implements Producer<K, V> {
             String ioThreadName = NETWORK_THREAD_PREFIX + " | " + clientId;
             this.ioThread = new KafkaThread(ioThreadName, this.sender, true);
             this.ioThread.start();
+            Long closeTimeoutMs = producerConfig.getLong(CommonClientConfigs.DEFAULT_CLOSE_TIMEOUT_CONFIG);
+            this.closeTimeoutMs = closeTimeoutMs != null ? closeTimeoutMs : DEFAULT_CLOSE_TIMEOUT_MS;
             config.logUnused();
             AppInfoParser.registerAppInfo(JMX_PREFIX, clientId, metrics, time.milliseconds());
             log.debug("Kafka producer started");
@@ -504,6 +507,7 @@ public class KafkaProducer<K, V> implements Producer<K, V> {
         this.metadata = metadata;
         this.sender = sender;
         this.ioThread = ioThread;
+        this.closeTimeoutMs = DEFAULT_CLOSE_TIMEOUT_MS;
     }
 
     // visible for testing
@@ -1264,8 +1268,8 @@ public class KafkaProducer<K, V> implements Producer<K, V> {
     }
 
     /**
-     * Close this producer. This method blocks until all previously sent requests complete.
-     * This method is equivalent to <code>close(Long.MAX_VALUE, TimeUnit.MILLISECONDS)</code>.
+     * Close this producer. This method blocks, for up to the configured timeout or all previously sent requests complete.
+     * The default timeout is equivalent to <code>close(Long.MAX_VALUE, TimeUnit.MILLISECONDS)</code>.
      * <p>
      * <strong>If close() is called from {@link Callback}, a warning message will be logged and close(0, TimeUnit.MILLISECONDS)
      * will be called instead. We do this because the sender thread would otherwise try to join itself and
@@ -1278,7 +1282,7 @@ public class KafkaProducer<K, V> implements Producer<K, V> {
      */
     @Override
     public void close() {
-        close(Duration.ofMillis(DEFAULT_CLOSE_TIMEOUT_MS));
+        close(Duration.ofMillis(closeTimeoutMs));
     }
 
     /**

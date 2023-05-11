@@ -484,7 +484,12 @@ public class ProducerConfig extends AbstractConfig {
                                         null,
                                         new ConfigDef.NonEmptyString(),
                                         Importance.LOW,
-                                        TRANSACTIONAL_ID_DOC);
+                                        TRANSACTIONAL_ID_DOC)
+                                .define(CommonClientConfigs.DEFAULT_CLOSE_TIMEOUT_CONFIG,
+                                        Type.LONG,
+                                        Long.MAX_VALUE,
+                                        Importance.LOW,
+                                        CommonClientConfigs.DEFAULT_CLOSE_TIMEOUT_DOC);
     }
 
     @Override

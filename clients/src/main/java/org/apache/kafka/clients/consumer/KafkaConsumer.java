@@ -565,12 +565,15 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
     private static final String CLIENT_ID_METRIC_TAG = "client-id";
     private static final long NO_CURRENT_THREAD = -1L;
     private static final String JMX_PREFIX = "kafka.consumer";
+
     static final long DEFAULT_CLOSE_TIMEOUT_MS = Long.parseLong(System.getProperty("kafka.defaultCloseTimeoutMs", String.valueOf(30 * 1000)));
     static final String DEFAULT_REASON = "rebalance enforced by user";
 
     // Visible for testing
     final Metrics metrics;
     final KafkaConsumerMetrics kafkaConsumerMetrics;
+
+    private final Long closeTimeoutMs;
 
     private Logger log;
     private final String clientId;
@@ -823,7 +826,8 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
             this.topicMetadataFetcher = new TopicMetadataFetcher(logContext, client, retryBackoffMs);
 
             this.kafkaConsumerMetrics = new KafkaConsumerMetrics(metrics, metricGrpPrefix);
-
+            Long closeTimeoutMs = config.getLong(CommonClientConfigs.DEFAULT_CLOSE_TIMEOUT_CONFIG);
+            this.closeTimeoutMs = closeTimeoutMs != null ? closeTimeoutMs: DEFAULT_CLOSE_TIMEOUT_MS;
             config.logUnused();
             AppInfoParser.registerAppInfo(JMX_PREFIX, clientId, metrics, time.milliseconds());
             log.debug("Kafka consumer initialized");
@@ -879,6 +883,7 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
         this.assignors = assignors;
         this.groupId = Optional.ofNullable(groupId);
         this.kafkaConsumerMetrics = new KafkaConsumerMetrics(metrics, "consumer");
+        this.closeTimeoutMs = DEFAULT_CLOSE_TIMEOUT_MS;
     }
 
     private static Metrics buildMetrics(ConsumerConfig config, Time time, String clientId) {
@@ -2374,7 +2379,7 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
     }
 
     /**
-     * Close the consumer, waiting for up to the default timeout of 30 seconds for any needed cleanup.
+     * Close the consumer, waiting for up to the configured timeout (default timeout of 30 seconds) for any needed cleanup.
      * If auto-commit is enabled, this will commit the current offsets if possible within the default
      * timeout. See {@link #close(Duration)} for details. Note that {@link #wakeup()}
      * cannot be used to interrupt close.
@@ -2385,7 +2390,7 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
      */
     @Override
     public void close() {
-        close(Duration.ofMillis(DEFAULT_CLOSE_TIMEOUT_MS));
+        close(Duration.ofMillis(closeTimeoutMs));
     }
 
     /**
